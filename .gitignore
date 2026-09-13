@@ -1,0 +1,16 @@
+# Build artifacts (anchored: only root-level outputs; do not ignore include/forger/)
+build/
+cmake-build-*/
+/Forger
+/forger
+*.o
+*.a
+*.d
+
+# Local runtime config (keep config.json as the template)
+config.local.json
+
+# Logs / core dumps
+*.log
+core
+core.*
