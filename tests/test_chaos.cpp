@@ -9,8 +9,8 @@
 //    - no rand() anywhere: std::mt19937_64 + uniform_real_distribution
 // ============================================================================
 
-#include "forger/chaos.hpp"
-#include "forger/docker_api.hpp"
+#include "Chaos_Forger/chaos.hpp"
+#include "Chaos_Forger/docker_api.hpp"
 
 #include <cstdio>
 #include <string>
@@ -36,8 +36,8 @@ static int g_checks = 0;
         }                                                                    \
     } while (0)
 
-using forger::ChaosRoller;
-using forger::MatchedContainer;
+using Chaos_Forger::ChaosRoller;
+using Chaos_Forger::MatchedContainer;
 
 static constexpr int kTrials = 10000;
 
@@ -46,7 +46,7 @@ static constexpr int kTrials = 10000;
 // ----------------------------------------------------------------------------
 static void test_action_budget() {
     auto mk = [](char fill) {
-        forger::Container c;
+        Chaos_Forger::Container c;
         c.id = std::string(64, fill);
         c.names = {std::string("app-") + fill};
         return MatchedContainer{c, 0};
@@ -55,39 +55,39 @@ static void test_action_budget() {
 
     // Per-cycle cap selects the first N in match order.
     {
-        const auto sel = forger::action_budget(armed, 2, 0, 0);
+        const auto sel = Chaos_Forger::action_budget(armed, 2, 0, 0);
         CHECK_EQ(sel.size(), 2u);
         CHECK_EQ(sel[0].container.id, armed[0].container.id);
         CHECK_EQ(sel[1].container.id, armed[1].container.id);
     }
     // Cap above the armed count -> everyone passes.
     {
-        const auto sel = forger::action_budget(armed, 10, 0, 0);
+        const auto sel = Chaos_Forger::action_budget(armed, 10, 0, 0);
         CHECK_EQ(sel.size(), 5u);
     }
     // Run budget nearly exhausted -> only the remainder passes.
     {
-        const auto sel = forger::action_budget(armed, 10, 3, 1);  // 2 remaining
+        const auto sel = Chaos_Forger::action_budget(armed, 10, 3, 1);  // 2 remaining
         CHECK_EQ(sel.size(), 2u);
     }
     // Run budget exhausted -> nothing is selected.
     {
-        const auto sel = forger::action_budget(armed, 5, 4, 4);
+        const auto sel = Chaos_Forger::action_budget(armed, 5, 4, 4);
         CHECK(sel.empty());
     }
     // Combined: per-cycle cap binds harder than the run budget.
     {
-        const auto sel = forger::action_budget(armed, 1, 100, 50);
+        const auto sel = Chaos_Forger::action_budget(armed, 1, 100, 50);
         CHECK_EQ(sel.size(), 1u);
     }
     // Invalid per-cycle values clamp to 1 (never silently disable strikes).
     {
-        const auto sel = forger::action_budget(armed, 0, 0, 0);
+        const auto sel = Chaos_Forger::action_budget(armed, 0, 0, 0);
         CHECK_EQ(sel.size(), 1u);
     }
     // Unlimited run budget (0) never binds.
     {
-        const auto sel = forger::action_budget(armed, 5, 0, 999999);
+        const auto sel = Chaos_Forger::action_budget(armed, 5, 0, 999999);
         CHECK_EQ(sel.size(), 5u);
     }
 }
