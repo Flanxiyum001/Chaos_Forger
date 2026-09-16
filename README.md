@@ -1,6 +1,6 @@
-# Forger
+# Chaos_Forger
 
-Forger is a lightweight chaos-engineering daemon for local Docker. It runs on
+Chaos_Forger is a lightweight chaos-engineering daemon for local Docker. It runs on
 your Linux host (or WSL2), periodically lists running containers, matches them
 against name rules you configure, and — on a probabilistic "dice roll" — stops
 or kills matching containers.
@@ -10,7 +10,7 @@ It talks to the Docker Engine directly over the UNIX domain socket
 libcurl, no Boost — the only dependencies are a C++17 compiler, CMake, and
 pthreads.
 
-> **Safety first:** Forger ships in **dry-run mode**. Real destruction requires
+> **Safety first:** Chaos_Forger ships in **dry-run mode**. Real destruction requires
 > an explicit `"dry_run": false` in the config, and every run prints the
 > blast-radius settings before acting.
 
@@ -35,7 +35,7 @@ pthreads.
   spaces so container names can't forge log lines
 - **Bounded resource use** — response/header/chunk size limits, socket
   timeouts, and a recursion-capped JSON parser; a misbehaving Engine cannot
-  make Forger allocate without bound
+  make Chaos_Forger allocate without bound
 - **Testable** — 44k+ unit assertions and a mock Engine, no Docker needed; a
   separate gated integration test uses disposable real containers
 
@@ -50,7 +50,7 @@ pthreads.
                                          |
                                          v
 +------------------+    rules   +---------------------------------+
-|   config.json    +----------->|       forger (static lib)       |
+|   config.json    +----------->|       Chaos_Forger (static lib)       |
 +------------------+            |                                 |
                                 |  config   JSON parse + validate |
 +------------------+            |  discovery  name matching       |
@@ -72,7 +72,7 @@ discover --> match --> roll dice --> budget --> strike --> log
 ## How It Works
 
 1. **Load config** and validate it (fail fast; a bad config never reaches the
-   engine). `FORGER_LOG_LEVEL` overrides the configured log level.
+   engine). `Chaos_Forger_LOG_LEVEL` overrides the configured log level.
 2. **Check the socket** exists and is a socket file, then ping the Engine.
 3. **Every `interval_seconds`**, tick:
    - `GET /v1.41/containers/json?all=false` (running containers only)
@@ -94,15 +94,15 @@ none.
 - Linux or WSL2 (uses `pthread_sigmask`, `localtime_r`, AF_UNIX)
 - GCC or Clang with C++17 support
 - CMake ≥ 3.10, Make, POSIX threads
-- Docker Engine with the UNIX socket enabled (for actually running Forger;
+- Docker Engine with the UNIX socket enabled (for actually running Chaos_Forger;
   unit tests do not need Docker)
 - Python 3 (only for the mock Engine / integration tooling)
 
 ## Installation
 
 ```bash
-git clone <your-fork-url> forger
-cd forger
+git clone <your-fork-url> Chaos_Forger
+cd Chaos_Forger
 ```
 
 Or grab a release tarball and unpack it. There is nothing to install beyond
@@ -116,7 +116,7 @@ cmake -S . -B build
 cmake --build build
 ```
 
-The daemon lands at `build/Forger`. The default configuration is Release.
+The daemon lands at `build/Chaos_Forger`. The default configuration is Release.
 
 Build types:
 
@@ -129,14 +129,14 @@ CMake options:
 
 | Option | Default | Meaning |
 |---|---|---|
-| `FORGER_BUILD_TESTS` | `ON` | build unit tests (run with ctest) |
-| `FORGER_ENABLE_ASAN` | `OFF` | AddressSanitizer (forces Debug) |
-| `FORGER_ENABLE_UBSAN` | `OFF` | UBSan (forces Debug) |
+| `Chaos_Forger_BUILD_TESTS` | `ON` | build unit tests (run with ctest) |
+| `Chaos_Forger_ENABLE_ASAN` | `OFF` | AddressSanitizer (forces Debug) |
+| `Chaos_Forger_ENABLE_UBSAN` | `OFF` | UBSan (forces Debug) |
 
 Sanitizer builds are for development only:
 
 ```bash
-cmake -S . -B build-asan -DFORGER_ENABLE_ASAN=ON && cmake --build build-asan
+cmake -S . -B build-asan -DChaos_Forger_ENABLE_ASAN=ON && cmake --build build-asan
 ctest --test-dir build-asan
 ```
 
@@ -144,12 +144,12 @@ Install (binary + sample config):
 
 ```bash
 sudo cmake --install build --prefix /usr/local
-# /usr/local/bin/Forger and /usr/local/etc/forger.json
+# /usr/local/bin/Chaos_Forger and /usr/local/etc/Chaos_Forger.json
 ```
 
 ## Configuration
 
-Forger reads a JSON config (default path `./config.json`, override with
+Chaos_Forger reads a JSON config (default path `./config.json`, override with
 `--config`):
 
 ```json
@@ -163,8 +163,8 @@ Forger reads a JSON config (default path `./config.json`, override with
   "max_actions_per_run": 10,
   "log_level": "info",
   "targets": [
-    { "name_match": "forger-web",   "action": "stop" },
-    { "name_match": "forger-cache", "action": "kill" }
+    { "name_match": "Chaos_Forger-web",   "action": "stop" },
+    { "name_match": "Chaos_Forger-cache", "action": "kill" }
   ]
 }
 ```
@@ -208,27 +208,27 @@ but no stop/kill request is ever sent. Instead you get lines like:
 You can also force it from the CLI regardless of config:
 
 ```bash
-./build/Forger --once --dry-run
+./build/Chaos_Forger --once --dry-run
 ```
 
 Go-live sequence: rehearse in dry-run → set a finite `max_actions_per_run` →
 flip `"dry_run": false` → watch the first ticks live.
 
-## Running Forger
+## Running Chaos_Forger
 
 ```bash
-# 1. Spin up disposable dummy targets (never point Forger at anything precious)
-docker run -d --name forger-web   nginx:alpine
-docker run -d --name forger-cache redis:alpine
+# 1. Spin up disposable dummy targets (never point Chaos_Forger at anything precious)
+docker run -d --name Chaos_Forger-web   nginx:alpine
+docker run -d --name Chaos_Forger-cache redis:alpine
 
 # 2. Rehearse: one tick, dry-run
-./build/Forger --once --dry-run
+./build/Chaos_Forger --once --dry-run
 
 # 3. Daemon mode (Ctrl+C for prompt clean shutdown)
-./build/Forger
+./build/Chaos_Forger
 
 # 4. Inspect-only: list matches and exit, never rolls or strikes
-./build/Forger --discover
+./build/Chaos_Forger --discover
 ```
 
 CLI options:
@@ -243,17 +243,17 @@ CLI options:
 | `-v, --version` | version |
 
 Log levels and streams: DEBUG/INFO → stdout, WARN/ERROR → stderr. Raise
-verbosity without touching config: `FORGER_LOG_LEVEL=debug ./build/Forger`.
+verbosity without touching config: `Chaos_Forger_LOG_LEVEL=debug ./build/Chaos_Forger`.
 
 A sample run (dry-run, one armed container):
 
 ```text
-[2026-09-13 12:00:01] [INFO] Forger starting
+[2026-09-13 12:00:01] [INFO] Chaos_Forger starting
 [2026-09-13 12:00:01] [INFO] Connecting to Docker
 [2026-09-13 12:00:01] [INFO] Connected to Docker
-[2026-09-13 12:00:06] [INFO] Matched container forger-web-1
+[2026-09-13 12:00:06] [INFO] Matched container Chaos_Forger-web-1
 [2026-09-13 12:00:06] [INFO] dice roll: 0.38 < 1.00 -> CHAOS FIRES
-[2026-09-13 12:00:06] [WARN] Dry-run: would stop forger-web-1 (aaaaaaaaaaaa)
+[2026-09-13 12:00:06] [WARN] Dry-run: would stop Chaos_Forger-web-1 (aaaaaaaaaaaa)
 ```
 
 ## Testing
@@ -266,87 +266,87 @@ ctest --test-dir build --output-on-failure
 
 | Suite | Covers |
 |---|---|
-| `forger_http_tests` | HTTP parser framing, Content-Length/chunked/EOF, malformed responses, Docker list parsing |
-| `forger_config_tests` | invalid JSON, missing fields, bad probability/interval/action, empty `name_match` |
-| `forger_discovery_tests` | name normalization, case-sensitive substring matching, names-only policy |
-| `forger_chaos_tests` | probability distribution, roller determinism |
-| `forger_shutdown_tests` | shutdown transitions, first-reason-wins, prompt CV wake |
-| `forger_engine_tests` | dry-run, blast-radius budgets, strike dispatch, fault isolation, shutdown guards |
+| `Chaos_Forger_http_tests` | HTTP parser framing, Content-Length/chunked/EOF, malformed responses, Docker list parsing |
+| `Chaos_Forger_config_tests` | invalid JSON, missing fields, bad probability/interval/action, empty `name_match` |
+| `Chaos_Forger_discovery_tests` | name normalization, case-sensitive substring matching, names-only policy |
+| `Chaos_Forger_chaos_tests` | probability distribution, roller determinism |
+| `Chaos_Forger_shutdown_tests` | shutdown transitions, first-reason-wins, prompt CV wake |
+| `Chaos_Forger_engine_tests` | dry-run, blast-radius budgets, strike dispatch, fault isolation, shutdown guards |
 
-All tests build from `FORGER_BUILD_TESTS=ON` (the default).
+All tests build from `Chaos_Forger_BUILD_TESTS=ON` (the default).
 
 ### Mock Engine (no Docker)
 
-`scripts/mock_test.py` fakes a Docker Engine on `/tmp/forger-test.sock` and
+`scripts/mock_test.py` fakes a Docker Engine on `/tmp/Chaos_Forger-test.sock` and
 logs every strike POST it receives:
 
 ```bash
 python3 scripts/mock_test.py &
 sleep 0.5
-sed 's#/var/run/docker.sock#/tmp/forger-test.sock#' config.json > /tmp/forger-smoke.json
-./build/Forger --once --dry-run --config /tmp/forger-smoke.json
+sed 's#/var/run/docker.sock#/tmp/Chaos_Forger-test.sock#' config.json > /tmp/Chaos_Forger-smoke.json
+./build/Chaos_Forger --once --dry-run --config /tmp/Chaos_Forger-smoke.json
 kill %1
-cat /tmp/forger-post.log   # strike requests the mock received
+cat /tmp/Chaos_Forger-post.log   # strike requests the mock received
 ```
 
 ## Integration Testing
 
-`scripts/integration_test.sh` exercises Forger against **real** Docker with
+`scripts/integration_test.sh` exercises Chaos_Forger against **real** Docker with
 **disposable containers**. It is *not* part of a plain `ctest` run: it exits
-77 (reported as skipped) unless `FORGER_IT_LIVE=1` is set, so normal test runs
+77 (reported as skipped) unless `Chaos_Forger_IT_LIVE=1` is set, so normal test runs
 never touch your Docker host.
 
 What it does:
 
-1. Creates `forger-test-web` (nginx:alpine), `forger-test-database`
-   (redis:alpine), and `forger-test-inert`, all labeled
-   `forger-integration-test`
+1. Creates `Chaos_Forger-test-web` (nginx:alpine), `Chaos_Forger-test-database`
+   (redis:alpine), and `Chaos_Forger-test-inert`, all labeled
+   `Chaos_Forger-integration-test`
 2. Verifies discovery + matching (positive and negative)
 3. Rehearses in dry-run (nothing stopped)
-4. Performs a real `stop` of `forger-test-web` and verifies state `exited`
+4. Performs a real `stop` of `Chaos_Forger-test-web` and verifies state `exited`
    while the others stay `running`
-5. Optionally performs `kill` of `forger-test-database` (exit code 137) with
-   `FORGER_IT_KILL=1`
+5. Optionally performs `kill` of `Chaos_Forger-test-database` (exit code 137) with
+   `Chaos_Forger_IT_KILL=1`
 6. Removes every test container on exit — even on failure — via a trap
 
-Only containers named `forger-test-*` *and* labeled
-`forger-integration-test` are ever created or removed; a pre-flight guard
-refuses to run if a `forger-test-*` container exists without the label.
+Only containers named `Chaos_Forger-test-*` *and* labeled
+`Chaos_Forger-integration-test` are ever created or removed; a pre-flight guard
+refuses to run if a `Chaos_Forger-test-*` container exists without the label.
 
 ```bash
 # Preview the plan (creates nothing, exits 77)
 bash scripts/integration_test.sh
 
 # Full rehearsal
-FORGER_IT_LIVE=1 bash scripts/integration_test.sh
+Chaos_Forger_IT_LIVE=1 bash scripts/integration_test.sh
 
 # Include the kill phase
-FORGER_IT_LIVE=1 FORGER_IT_KILL=1 bash scripts/integration_test.sh
+Chaos_Forger_IT_LIVE=1 Chaos_Forger_IT_KILL=1 bash scripts/integration_test.sh
 
 # Or through ctest
-FORGER_IT_LIVE=1 ctest --test-dir build -R forger_integration_tests --output-on-failure
+Chaos_Forger_IT_LIVE=1 ctest --test-dir build -R Chaos_Forger_integration_tests --output-on-failure
 ```
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `FORGER_IT_LIVE` | unset | **required** to create/strike anything |
-| `FORGER_IT_KILL` | unset | additionally test `kill` (disposable db only) |
-| `FORGER_IT_KEEP` | unset | keep containers after the run |
-| `FORGER_IT_DOCKER_SOCK` | `/var/run/docker.sock` | socket handed to Forger |
-| `FORGER_IT_IMAGE_WEB` / `FORGER_IT_IMAGE_DB` | `nginx:alpine` / `redis:alpine` | disposable images |
-| `FORGER_BIN` | `build/Forger` | Forger binary under test |
+| `Chaos_Forger_IT_LIVE` | unset | **required** to create/strike anything |
+| `Chaos_Forger_IT_KILL` | unset | additionally test `kill` (disposable db only) |
+| `Chaos_Forger_IT_KEEP` | unset | keep containers after the run |
+| `Chaos_Forger_IT_DOCKER_SOCK` | `/var/run/docker.sock` | socket handed to Chaos_Forger |
+| `Chaos_Forger_IT_IMAGE_WEB` / `Chaos_Forger_IT_IMAGE_DB` | `nginx:alpine` / `redis:alpine` | disposable images |
+| `Chaos_Forger_BIN` | `build/Chaos_Forger` | Chaos_Forger binary under test |
 
 ## Security Considerations
 
 **Access to `/var/run/docker.sock` is effectively root on the host.** Any
 process that can talk to that socket can start privileged containers, mount
-the host filesystem, and escape the container sandbox entirely. Forger holds
+the host filesystem, and escape the container sandbox entirely. Chaos_Forger holds
 that power while it runs — treat it (and its config) accordingly:
 
-- Run Forger as a **non-root user in the `docker` group**, never as root if
+- Run Chaos_Forger as a **non-root user in the `docker` group**, never as root if
   you can avoid it. If you would not give that user `sudo`, think twice.
 - **Config file permissions matter.** `config.json` decides what gets struck.
-  Keep it owned and writable only by the Forger user; a world-writable config
+  Keep it owned and writable only by the Chaos_Forger user; a world-writable config
   is a remote-controlled destruction switch.
 - No shell is ever invoked: there is no `system()`, `popen()`, `exec*()`, or
   `fork()` in the codebase. Container IDs are validated as exactly 64 hex
@@ -355,27 +355,27 @@ that power while it runs — treat it (and its config) accordingly:
 - A hostile **local** Engine response is bounded (16 MB body cap, 64 KB
   header cap, 5 s socket timeout, recursion-capped JSON parser). But the
   Engine itself is inside the trust boundary: a compromised daemon on the
-  host has far easier routes than Forger's parser.
+  host has far easier routes than Chaos_Forger's parser.
 - Log forging is mitigated: CR/LF bytes in log messages are folded to spaces,
   so container names or Engine error bodies cannot fabricate `[LEVEL]` lines.
 - Randomness uses `std::mt19937_64` seeded from `std::random_device`; the
   dice are not a security mechanism, but they are not guessable via `rand()`.
 
-Forger is **not claimed to be secure** — see [Limitations](#limitations).
+Chaos_Forger is **not claimed to be secure** — see [Limitations](#limitations).
 
 ## Limitations
 
-- **No privilege separation**: Forger runs with whatever the socket grants.
+- **No privilege separation**: Chaos_Forger runs with whatever the socket grants.
 - **Linux-only** by design (AF_UNIX, `pthread_sigmask`, `localtime_r`).
 - **One request per connection** (`Connection: close`); no keep-alive,
   pipelining, TLS, redirects, compression, or streaming/attach endpoints.
 - **No config reload**: `SIGHUP` is not handled; restart to re-read config.
 - **Substring matching is blunt**: `web` matches `web-app` and `web-2`. Broad
-  patterns are operator error Forger will not prevent — scope rules carefully.
+  patterns are operator error Chaos_Forger will not prevent — scope rules carefully.
 - **`max_actions_per_run` resets on restart** (it is process-lifetime).
 - **No authentication/authorization** on the config: whoever edits it chooses
   the targets.
-- The strike budget is enforced per process; a second Forger instance doubles
+- The strike budget is enforced per process; a second Chaos_Forger instance doubles
   the blast radius.
 
 ## Troubleshooting
@@ -384,7 +384,7 @@ Forger is **not claimed to be secure** — see [Limitations](#limitations).
 |---|---|
 | `docker socket not found at '...'` | Start the daemon: `sudo service docker start` (WSL2). Check `docker context ls` if you use a non-default socket. |
 | `permission denied while connecting` | Add yourself to the `docker` group and re-login: `sudo usermod -aG docker $USER` |
-| No matches despite running containers | Check `FORGER_LOG_LEVEL=debug ./build/Forger --once --dry-run` to see names as seen and rules as armed |
+| No matches despite running containers | Check `Chaos_Forger_LOG_LEVEL=debug ./build/Chaos_Forger --once --dry-run` to see names as seen and rules as armed |
 | Strikes fire too often | Lower `chaos_probability`, or cap the blast: `max_actions_per_cycle`, `max_actions_per_run` |
 | Startup exits 1 with a config error | The message names the key and echoes the offending value; fix that key |
 | Log lines missing | DEBUG/INFO go to stdout, WARN/ERROR to stderr — don't merge them when filtering |
@@ -399,22 +399,22 @@ cmake -S . -B build && cmake --build build && ctest --test-dir build
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build
 
 # Sanitizers
-cmake -S . -B build-asan -DFORGER_ENABLE_ASAN=ON && cmake --build build-asan && ctest --test-dir build-asan
-cmake -S . -B build-ubsan -DFORGER_ENABLE_UBSAN=ON && cmake --build build-ubsan && ctest --test-dir build-ubsan
+cmake -S . -B build-asan -DChaos_Forger_ENABLE_ASAN=ON && cmake --build build-asan && ctest --test-dir build-asan
+cmake -S . -B build-ubsan -DChaos_Forger_ENABLE_UBSAN=ON && cmake --build build-ubsan && ctest --test-dir build-ubsan
 
 # Mock-engine loop without Docker
 python3 scripts/mock_test.py & sleep 0.5
-sed 's#/var/run/docker.sock#/tmp/forger-test.sock#' config.json > /tmp/forger-smoke.json
-./build/Forger --once --dry-run --config /tmp/forger-smoke.json && kill %1
+sed 's#/var/run/docker.sock#/tmp/Chaos_Forger-test.sock#' config.json > /tmp/Chaos_Forger-smoke.json
+./build/Chaos_Forger --once --dry-run --config /tmp/Chaos_Forger-smoke.json && kill %1
 ```
 
 Layout:
 
 ```text
-CMakeLists.txt        build: forger static lib + Forger daemon + tests
+CMakeLists.txt        build: Chaos_Forger static lib + Chaos_Forger daemon + tests
 main.cpp              daemon shell: CLI, signals, scheduler loop
 config.json           reference configuration (dry-run by default)
-include/forger/       library headers (log, json, http_socket, docker_api,
+include/Chaos_Forger/       library headers (log, json, http_socket, docker_api,
                       config, discovery, chaos, shutdown, engine)
 src/                  library sources (HTTP/1.1 over UNIX socket, Docker API
                       v1.41, config, matching, engine, shutdown)
