@@ -14,7 +14,7 @@
 //    - shutdown guards: no discovery, no roll, no strike after stop_requested
 // ============================================================================
 
-#include "forger/engine.hpp"
+#include "Chaos_Forger/engine.hpp"
 
 #include <cstdio>
 #include <functional>
@@ -42,7 +42,7 @@ static int g_checks = 0;
         }                                                                    \
     } while (0)
 
-using namespace forger;
+using namespace Chaos_Forger;
 
 // ----------------------------------------------------------------------------
 // FakeDockerClient: scripts discovery, records strikes, optional failures.
