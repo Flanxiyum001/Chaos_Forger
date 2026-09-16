@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-//  forger/docker_api.hpp — Docker Engine API client (version-pinned v1.41)
+//  Chaos_Forger/docker_api.hpp — Docker Engine API client (version-pinned v1.41)
 //
 //  Pure path/ID validation helpers are free functions so unit tests can pin
 //  down request construction without any I/O.
@@ -11,9 +11,9 @@
 #include <string>
 #include <vector>
 
-#include "forger/http_socket.hpp"
+#include "Chaos_Forger/http_socket.hpp"
 
-namespace forger {
+namespace Chaos_Forger {
 
 inline constexpr const char* kDockerApiVersion = "v1.41";
 
@@ -36,7 +36,7 @@ std::string normalize_container_name(std::string raw);
 // root-equivalent. A malformed ID must never reach the wire.
 
 // Valid Engine container IDs are 64 lowercase hex chars (Docker may also
-// accept prefixed forms; Forger only forwards IDs it received verbatim from
+// accept prefixed forms; Chaos_Forger only forwards IDs it received verbatim from
 // /containers/json, so the strict form is enforced here).
 bool is_valid_container_id(const std::string& id);
 
@@ -72,7 +72,7 @@ public:
     virtual bool ping(std::string& err) = 0;
 };
 
-// The Engine API is stateless and Forger uses `Connection: close`, so every
+// The Engine API is stateless and Chaos_Forger uses `Connection: close`, so every
 // request gets a fresh connection: the factory is invoked once per request.
 using TransportFactory = std::function<std::unique_ptr<Transport>()>;
 
@@ -108,4 +108,4 @@ private:
     TransportFactory make_transport_;
 };
 
-}  // namespace forger
+}  // namespace Chaos_Forger
