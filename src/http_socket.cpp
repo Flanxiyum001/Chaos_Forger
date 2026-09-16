@@ -2,7 +2,7 @@
 //  src/http_socket.cpp — implementation of the UNIX-socket HTTP layer
 // ============================================================================
 
-#include "forger/http_socket.hpp"
+#include "Chaos_Forger/http_socket.hpp"
 
 #include <cctype>
 #include <cerrno>
@@ -20,9 +20,9 @@
 #include <algorithm>
 #include <cstdlib>
 
-#include "forger/log.hpp"
+#include "Chaos_Forger/log.hpp"
 
-namespace forger {
+namespace Chaos_Forger {
 
 std::string sys_error(const std::string& what) {
     return what + ": " + std::strerror(errno);
@@ -416,7 +416,7 @@ std::string build_http_request(const std::string& method, const std::string& pat
     std::ostringstream req;
     req << method << " " << path_with_query << " HTTP/1.1\r\n"
         << "Host: docker\r\n"
-        << "User-Agent: Forger/1.0\r\n"
+        << "User-Agent: Chaos_Forger/1.0\r\n"
         << "Accept: application/json\r\n"
         << "Connection: close\r\n"
         << "Content-Length: " << body.size() << "\r\n"
@@ -476,4 +476,4 @@ bool HttpClient::request(const std::string& method, const std::string& path_with
     return true;
 }
 
-}  // namespace forger
+}  // namespace Chaos_Forger
