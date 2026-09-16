@@ -1,8 +1,8 @@
-# Build artifacts (anchored: only root-level outputs; do not ignore include/forger/)
+# Build artifacts (anchored: only root-level outputs; do not ignore include/Chaos_Forger/)
 build/
 cmake-build-*/
-/Forger
-/forger
+/Chaos_Forger
+/Chaos_Forger
 *.o
 *.a
 *.d
