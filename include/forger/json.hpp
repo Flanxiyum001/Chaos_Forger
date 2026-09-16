@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-//  forger/json.hpp — minimal read-only JSON value + recursive-descent parser.
+//  Chaos_Forger/json.hpp — minimal read-only JSON value + recursive-descent parser.
 //  Handles nested objects/arrays, escapes, surrogate pairs, depth limits,
 //  and rejects trailing garbage. No serialization, no third-party code.
 // ============================================================================
@@ -10,7 +10,7 @@
 #include <variant>
 #include <vector>
 
-namespace forger {
+namespace Chaos_Forger {
 
 struct Json;
 using JsonObject = std::map<std::string, Json>;
@@ -55,4 +55,4 @@ public:
     static bool parse(const std::string& text, Json& out, std::string& err);
 };
 
-}  // namespace forger
+}  // namespace Chaos_Forger
