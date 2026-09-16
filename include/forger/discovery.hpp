@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-//  forger/discovery.hpp — container discovery matching (pure logic, no I/O)
+//  Chaos_Forger/discovery.hpp — container discovery matching (pure logic, no I/O)
 //
 //  Containers come in from the Docker client, rules from the config; the
 //  matching policy lives here so it is unit-testable without a daemon.
@@ -19,10 +19,10 @@
 #include <string>
 #include <vector>
 
-#include "forger/config.hpp"     // TargetRule
-#include "forger/docker_api.hpp" // Container
+#include "Chaos_Forger/config.hpp"     // TargetRule
+#include "Chaos_Forger/docker_api.hpp" // Container
 
-namespace forger {
+namespace Chaos_Forger {
 
 // Case-sensitive substring test. An empty needle never matches (config
 // validation rejects empty name_match anyway — defense in depth).
@@ -38,4 +38,4 @@ struct MatchedContainer {
 std::vector<MatchedContainer> match_containers(const std::vector<Container>& containers,
                                                const std::vector<TargetRule>& rules);
 
-}  // namespace forger
+}  // namespace Chaos_Forger
