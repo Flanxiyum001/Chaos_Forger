@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-//  forger/http_socket.hpp — native HTTP/1.1 client over a POSIX UNIX socket
+//  Chaos_Forger/http_socket.hpp — native HTTP/1.1 client over a POSIX UNIX socket
 //
 //  No libcurl, no Docker SDK, no Boost. Raw AF_UNIX SOCK_STREAM plus a
 //  hand-written, feed-based HTTP/1.1 response parser.
@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 
-namespace forger {
+namespace Chaos_Forger {
 
 // ----------------------------------------------------------------------------
 // Transport abstraction: the only seam between HTTP logic and POSIX sockets.
@@ -171,4 +171,4 @@ private:
 std::string build_http_request(const std::string& method, const std::string& path_with_query,
                                const std::string& body);
 
-}  // namespace forger
+}  // namespace Chaos_Forger
