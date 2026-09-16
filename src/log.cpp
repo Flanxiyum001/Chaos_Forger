@@ -1,5 +1,5 @@
 // ============================================================================
-//  src/log.cpp — logging backend for the forger library
+//  src/log.cpp — logging backend for the Chaos_Forger library
 //
 //  Format:  [YYYY-MM-DD HH:MM:SS] [LEVEL] message
 //  Streams: DEBUG/INFO -> stdout, WARN/ERROR -> stderr
@@ -11,7 +11,7 @@
 //  runs live. Filtered-out levels pay one relaxed atomic load.
 // ============================================================================
 
-#include "forger/log.hpp"
+#include "Chaos_Forger/log.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -24,7 +24,7 @@ namespace {
 LogLevel level_from_env_or_default() {
     // getenv before main() is fine for plain C strings (no allocation, no
     // other threads exist yet); the value is parsed with strtoull.
-    if (const char* raw = ::getenv("FORGER_LOG_LEVEL")) {
+    if (const char* raw = ::getenv("Chaos_Forger_LOG_LEVEL")) {
         const std::string v = raw;  // NOLINT: readable compare, runs once
         if (v == "debug") return LogLevel::Debug;
         if (v == "info") return LogLevel::Info;
@@ -51,11 +51,11 @@ bool goes_to_stderr(LogLevel lvl) { return lvl >= LogLevel::Warn; }
 
 }  // namespace
 
-void forger_set_log_level(LogLevel lvl) { g_log_level.store(lvl, std::memory_order_relaxed); }
+void Chaos_Forger_set_log_level(LogLevel lvl) { g_log_level.store(lvl, std::memory_order_relaxed); }
 
-LogLevel forger_log_level() { return g_log_level.load(std::memory_order_relaxed); }
+LogLevel Chaos_Forger_log_level() { return g_log_level.load(std::memory_order_relaxed); }
 
-void forger_log_line(LogLevel lvl, const std::string& msg) {
+void Chaos_Forger_log_line(LogLevel lvl, const std::string& msg) {
     if (lvl < g_log_level.load(std::memory_order_relaxed)) return;
 
     using clock = std::chrono::system_clock;
