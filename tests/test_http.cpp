@@ -1,5 +1,5 @@
 // ============================================================================
-//  tests/test_http.cpp — unit tests for the Forger communication layer
+//  tests/test_http.cpp — unit tests for the Chaos_Forger communication layer
 //
 //  Dependency-free assert-based harness. Covers:
 //    - build_http_request wire format
@@ -10,9 +10,9 @@
 //    - end-to-end parser via a scripted fake Transport
 // ============================================================================
 
-#include "forger/docker_api.hpp"
-#include "forger/http_socket.hpp"
-#include "forger/json.hpp"
+#include "Chaos_Forger/docker_api.hpp"
+#include "Chaos_Forger/http_socket.hpp"
+#include "Chaos_Forger/json.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -41,7 +41,7 @@ static int g_checks = 0;
         }                                                                    \
     } while (0)
 
-using namespace forger;
+using namespace Chaos_Forger;
 
 // ----------------------------------------------------------------------------
 // Feed helper: push a string through the parser, optionally split.
@@ -63,7 +63,7 @@ static void test_request_builder() {
     const std::string wire = build_http_request("GET", "/v1.41/containers/json", "");
     CHECK(wire == "GET /v1.41/containers/json HTTP/1.1\r\n"
                   "Host: docker\r\n"
-                  "User-Agent: Forger/1.0\r\n"
+                  "User-Agent: Chaos_Forger/1.0\r\n"
                   "Accept: application/json\r\n"
                   "Connection: close\r\n"
                   "Content-Length: 0\r\n"
