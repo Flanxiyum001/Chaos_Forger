@@ -8,7 +8,7 @@
 //    - reason() starts NotRequested and stays at the first requested reason
 // ============================================================================
 
-#include "forger/shutdown.hpp"
+#include "Chaos_Forger/shutdown.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -28,8 +28,8 @@ static int g_checks = 0;
         }                                                                    \
     } while (0)
 
-using forger::ShutdownState;
-using forger::StopReason;
+using Chaos_Forger::ShutdownState;
+using Chaos_Forger::StopReason;
 
 // ----------------------------------------------------------------------------
 // Initial state: running, no reason.
