@@ -2,11 +2,11 @@
 //  src/shutdown.cpp — ShutdownState implementation
 // ============================================================================
 
-#include "forger/shutdown.hpp"
+#include "Chaos_Forger/shutdown.hpp"
 
 #include <chrono>
 
-namespace forger {
+namespace Chaos_Forger {
 
 const char* stop_reason_name(StopReason r) {
     switch (r) {
@@ -23,4 +23,4 @@ void ShutdownState::wait_for_stop(int timeout_ms) {
                  [this] { return state_.load(std::memory_order_acquire); });
 }
 
-}  // namespace forger
+}  // namespace Chaos_Forger
