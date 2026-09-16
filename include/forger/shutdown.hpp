@@ -1,11 +1,11 @@
 #pragma once
 // ============================================================================
-//  forger/shutdown.hpp — the process-wide shutdown state, as a testable object
+//  Chaos_Forger/shutdown.hpp — the process-wide shutdown state, as a testable object
 //
 //  Extraction of the flag previously kept in main.cpp, so the chaos engine's
 //  shutdown guards are unit-testable without signals, threads, or a daemon:
 //  tests flip request() and assert tick() skips work and strikes stop
-//  mid-sweep. Forger runs exactly one ShutdownState (main.cpp owns it); the
+//  mid-sweep. Chaos_Forger runs exactly one ShutdownState (main.cpp owns it); the
 //  class itself is plain value semantics, no globals.
 //
 //  Wait mechanism (production): a condition_variable so SIGINT/SIGTERM via
@@ -18,7 +18,7 @@
 #include <mutex>
 #include <string>
 
-namespace forger {
+namespace Chaos_Forger {
 
 // Why the process is stopping. Used for the exit-reason log line and for
 // deciding the exit code in main(). Extensible: future internal shutdown
@@ -74,4 +74,4 @@ private:
     std::condition_variable cv_;
 };
 
-}  // namespace forger
+}  // namespace Chaos_Forger
