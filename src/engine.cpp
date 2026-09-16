@@ -2,7 +2,7 @@
 //  src/engine.cpp — the chaos engine: one tick = discover -> match -> roll -> strike
 // ============================================================================
 
-#include "forger/engine.hpp"
+#include "Chaos_Forger/engine.hpp"
 
 #include <iomanip>
 #include <sstream>
@@ -10,9 +10,9 @@
 #include <utility>
 #include <vector>
 
-#include "forger/log.hpp"
+#include "Chaos_Forger/log.hpp"
 
-namespace forger {
+namespace Chaos_Forger {
 
 namespace {
 
@@ -59,7 +59,7 @@ bool ChaosEngine::tick() {
     LOG_DEBUG("tick: " + std::to_string(running.size()) + " running container(s) discovered");
 
     // Matching policy (names-only, case-sensitive substring, first rule
-    // wins) lives in forger::match_containers — see forger/discovery.hpp.
+    // wins) lives in Chaos_Forger::match_containers — see Chaos_Forger/discovery.hpp.
     const auto matched = match_containers(running, cfg_.targets);
     if (matched.empty()) {
         log_quiet_tick(running.size());
@@ -111,7 +111,7 @@ bool ChaosEngine::tick() {
 
 // The probability gate: evaluated ONCE per scheduler cycle, before any
 // strike. When it fires, every armed container is struck; when it does
-// not, none are. Semantics documented in forger/chaos.hpp.
+// not, none are. Semantics documented in Chaos_Forger/chaos.hpp.
 bool ChaosEngine::should_strike() {
     ++counters_.rolls;
     if (forced_roll_.has_value()) {
@@ -191,4 +191,4 @@ void ChaosEngine::execute_strikes(const std::vector<MatchedContainer>& armed) {
 
 void ChaosEngine::force_next_roll(bool fires) { forced_roll_ = fires; }
 
-}  // namespace forger
+}  // namespace Chaos_Forger
