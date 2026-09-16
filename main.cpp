@@ -1,12 +1,12 @@
 // ============================================================================
-//  Forger — lightweight chaos-engineering daemon for the local Docker Engine
+//  Chaos_Forger — lightweight chaos-engineering daemon for the local Docker Engine
 //
 //  Talks to Docker over the UNIX domain socket (/var/run/docker.sock) using
 //  raw HTTP/1.1 built by hand. No Docker SDK, no libcurl, no Boost.
 //
 //  This file is a thin shell: config load, log level, socket presence check,
 //  signal plumbing, lifecycle logging, and the daemon timing loop. The chaos
-//  engine itself lives in the library (forger/engine.hpp) behind interfaces
+//  engine itself lives in the library (Chaos_Forger/engine.hpp) behind interfaces
 //  (IDockerClient, ShutdownState) so it is unit-testable without Docker.
 // ============================================================================
 
@@ -27,13 +27,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "forger/config.hpp"
-#include "forger/engine.hpp"
-#include "forger/log.hpp"
-#include "forger/shutdown.hpp"
+#include "Chaos_Forger/config.hpp"
+#include "Chaos_Forger/engine.hpp"
+#include "Chaos_Forger/log.hpp"
+#include "Chaos_Forger/shutdown.hpp"
 
-#ifndef FORGER_VERSION
-#define FORGER_VERSION "1.0.0"
+#ifndef Chaos_Forger_VERSION
+#define Chaos_Forger_VERSION "1.0.0"
 #endif
 
 using Clock = std::chrono::steady_clock;
@@ -42,12 +42,12 @@ using Clock = std::chrono::steady_clock;
 static std::string format_prob(double p);
 
 // ============================================================================
-// [1] SHUTDOWN STATE + SIGNAL LISTENER (plumbing only; state in forger/shutdown)
+// [1] SHUTDOWN STATE + SIGNAL LISTENER (plumbing only; state in Chaos_Forger/shutdown)
 // ============================================================================
 
 // The single process-wide shutdown state: owned here, shared with the engine
 // and the scheduler loop (both take non-owning pointers/references).
-static forger::ShutdownState g_shutdown;
+static Chaos_Forger::ShutdownState g_shutdown;
 
 // Signal number that requested shutdown (0 until a signal is caught).
 static std::atomic<int> g_signal_received{0};
@@ -72,7 +72,7 @@ static bool install_signal_handlers(std::string& err) {
     ::sigaddset(&g_signal_set, SIGINT);
     ::sigaddset(&g_signal_set, SIGTERM);
     if (::pthread_sigmask(SIG_BLOCK, &g_signal_set, nullptr) != 0) {
-        err = forger::sys_error("pthread_sigmask(SIG_BLOCK) failed");
+        err = Chaos_Forger::sys_error("pthread_sigmask(SIG_BLOCK) failed");
         return false;
     }
     return true;
@@ -109,15 +109,15 @@ static void join_signal_listener() {
 static bool shutting_down() { return g_shutdown.stop_requested(); }
 
 // ============================================================================
-// [2] LOG LEVEL (config value or FORGER_LOG_LEVEL -> library log backend)
+// [2] LOG LEVEL (config value or Chaos_Forger_LOG_LEVEL -> library log backend)
 // ============================================================================
 
-// FORGER_LOG_LEVEL=debug|info|warn|error overrides config's log_level (handy
+// Chaos_Forger_LOG_LEVEL=debug|info|warn|error overrides config's log_level (handy
 // for CI and containers: no config edit needed). The value is case-insensitive;
 // an empty value counts as unset. An invalid value is a hard startup error --
 // silently running at the wrong verbosity is how strikes go unnoticed.
 static bool log_level_from_env(std::string& out) {
-    const char* raw = ::getenv("FORGER_LOG_LEVEL");
+    const char* raw = ::getenv("Chaos_Forger_LOG_LEVEL");
     if (raw == nullptr || *raw == '\0') return false;
     out = raw;
     for (char& c : out) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
@@ -125,10 +125,10 @@ static bool log_level_from_env(std::string& out) {
 }
 
 static bool apply_log_level(const std::string& lvl, std::string& err) {
-    if (lvl == "debug") forger_set_log_level(LogLevel::Debug);
-    else if (lvl == "info") forger_set_log_level(LogLevel::Info);
-    else if (lvl == "warn") forger_set_log_level(LogLevel::Warn);
-    else if (lvl == "error") forger_set_log_level(LogLevel::Error);
+    if (lvl == "debug") Chaos_Forger_set_log_level(LogLevel::Debug);
+    else if (lvl == "info") Chaos_Forger_set_log_level(LogLevel::Info);
+    else if (lvl == "warn") Chaos_Forger_set_log_level(LogLevel::Warn);
+    else if (lvl == "error") Chaos_Forger_set_log_level(LogLevel::Error);
     else {
         err = "unknown log level '" + lvl + "'";
         return false;
@@ -144,13 +144,13 @@ static std::string format_prob(double p) {
 }
 
 // ============================================================================
-// [3] SCHEDULER LOOP (daemon timing only; tick pipeline lives in forger/engine)
+// [3] SCHEDULER LOOP (daemon timing only; tick pipeline lives in Chaos_Forger/engine)
 // ============================================================================
 
-// Daemon loop: waits on the shutdown condition_variable (forger/shutdown.hpp)
+// Daemon loop: waits on the shutdown condition_variable (Chaos_Forger/shutdown.hpp)
 // until the next tick or shutdown, whichever comes first -- a signal ends the
 // wait immediately no matter how long interval_seconds is.
-static void run_until_shutdown(forger::ChaosEngine& engine, const forger::Config& cfg) {
+static void run_until_shutdown(Chaos_Forger::ChaosEngine& engine, const Chaos_Forger::Config& cfg) {
     if (shutting_down()) return;
     LOG_INFO("Scheduler started: interval=" + std::to_string(cfg.interval_seconds) +
              "s, chaos_probability=" + format_prob(cfg.chaos_probability) +
@@ -182,7 +182,7 @@ static void run_until_shutdown(forger::ChaosEngine& engine, const forger::Config
 
 static void print_usage(const char* argv0) {
     std::fprintf(stderr,
-                 "Forger %s -- local Docker chaos daemon\n"
+                 "Chaos_Forger %s -- local Docker chaos daemon\n"
                  "\n"
                  "Usage: %s [options]\n"
                  "\n"
@@ -193,7 +193,7 @@ static void print_usage(const char* argv0) {
                  "  -d, --discover        list running containers, log rule matches, exit\n"
                  "  -h, --help            show this help\n"
                  "  -v, --version         print version\n",
-                 FORGER_VERSION, argv0);
+                 Chaos_Forger_VERSION, argv0);
 }
 
 // === MAIN_FUNCTION_BELOW ===
@@ -226,7 +226,7 @@ int main(int argc, char** argv) {
             print_usage(argv[0]);
             return 0;
         } else if (arg == "-v" || arg == "--version") {
-            std::printf("Forger %s\n", FORGER_VERSION);
+            std::printf("Chaos_Forger %s\n", Chaos_Forger_VERSION);
             return 0;
         } else {
             LOG_ERROR("unknown argument '" + arg + "'");
@@ -236,21 +236,21 @@ int main(int argc, char** argv) {
     }
 
     // ---- Configuration (fail fast: never run misconfigured) -----------------
-    forger::Config cfg;
+    Chaos_Forger::Config cfg;
     std::string err;
-    if (!forger::load_config(config_path, cfg, err)) {
+    if (!Chaos_Forger::load_config(config_path, cfg, err)) {
         LOG_ERROR("configuration error: " + err);
         return 1;
     }
     if (dry_run_flag) cfg.dry_run = true;  // CLI flag overrides config
 
-    // Log level: FORGER_LOG_LEVEL (if set) beats config's log_level; a bad
+    // Log level: Chaos_Forger_LOG_LEVEL (if set) beats config's log_level; a bad
     // value must fail fast, never run at the wrong verbosity.
     bool level_from_env = false;
     std::string env_level;
     if (log_level_from_env(env_level)) {
         if (!apply_log_level(env_level, err)) {
-            LOG_ERROR("configuration error: FORGER_LOG_LEVEL: " + err);
+            LOG_ERROR("configuration error: Chaos_Forger_LOG_LEVEL: " + err);
             return 1;
         }
         cfg.log_level = env_level;
@@ -279,11 +279,11 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    LOG_INFO("Forger starting");
+    LOG_INFO("Chaos_Forger starting");
 
     // ---- Docker reachability probe ------------------------------------------
     LOG_INFO("Connecting to Docker");
-    forger::DockerClient docker(forger::DockerClient::unix_socket_factory(cfg.docker_socket));
+    Chaos_Forger::DockerClient docker(Chaos_Forger::DockerClient::unix_socket_factory(cfg.docker_socket));
     if (!docker.ping(err)) {
         LOG_ERROR("docker engine unreachable: " + err);
         return 1;
@@ -291,23 +291,23 @@ int main(int argc, char** argv) {
     LOG_INFO("Connected to Docker");
 
     // ---- Engine wiring: real client + shared shutdown state -----------------
-    forger::ChaosEngine::Deps deps;
+    Chaos_Forger::ChaosEngine::Deps deps;
     deps.docker = &docker;
     deps.shutdown = &g_shutdown;
     deps.discover_only = discover_flag;
     const std::optional<bool> dry_run_override =
         dry_run_flag ? std::optional<bool>(true) : std::nullopt;
-    forger::ChaosEngine engine(deps, cfg, dry_run_override);
+    Chaos_Forger::ChaosEngine engine(deps, cfg, dry_run_override);
 
-    LOG_INFO("Forger " FORGER_VERSION ": config='" + config_path +
-             "' socket='" + cfg.docker_socket + "' api=" + forger::kDockerApiVersion +
+    LOG_INFO("Chaos_Forger " Chaos_Forger_VERSION ": config='" + config_path +
+             "' socket='" + cfg.docker_socket + "' api=" + Chaos_Forger::kDockerApiVersion +
              " interval=" + std::to_string(cfg.interval_seconds) + "s" +
              " chaos_probability=" + format_prob(cfg.chaos_probability) +
              " targets=" + std::to_string(cfg.targets.size()) +
              " log=" + cfg.log_level + (level_from_env ? " (env)" : " (config)"));
-    for (const forger::TargetRule& rule : cfg.targets) {
+    for (const Chaos_Forger::TargetRule& rule : cfg.targets) {
         LOG_INFO("  rule: name~='" + rule.name_match + "' -> " +
-                 std::string(forger::action_name(rule.action)));
+                 std::string(Chaos_Forger::action_name(rule.action)));
     }
 
     // ---- Startup safety warning (both --once and daemon modes) --------------
@@ -345,9 +345,9 @@ int main(int argc, char** argv) {
     // tick was closed inside HttpClient::request; `docker` is destroyed on
     // return, releasing anything left.
     LOG_DEBUG("Docker connections closed");
-    LOG_INFO("Forger stopped | rolls=" + std::to_string(engine.rolls()) +
+    LOG_INFO("Chaos_Forger stopped | rolls=" + std::to_string(engine.rolls()) +
              " strikes=" + std::to_string(engine.strikes()) +
              " errors=" + std::to_string(engine.errors()) +
-             " | reason=" + forger::stop_reason_name(g_shutdown.reason()));
+             " | reason=" + Chaos_Forger::stop_reason_name(g_shutdown.reason()));
     return 0;
 }
