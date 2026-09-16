@@ -1,8 +1,8 @@
 // ============================================================================
-//  tests/test_config.cpp — unit tests for the Forger configuration system
+//  tests/test_config.cpp — unit tests for the Chaos_Forger configuration system
 // ============================================================================
 
-#include "forger/config.hpp"
+#include "Chaos_Forger/config.hpp"
 
 #include <cstdio>
 #include <string>
@@ -39,7 +39,7 @@ static int g_checks = 0;
         }                                                                    \
     } while (0)
 
-using namespace forger;
+using namespace Chaos_Forger;
 
 // ----------------------------------------------------------------------------
 static bool validate_text(const std::string& text, Config& cfg, std::string& err) {
@@ -324,7 +324,7 @@ static void test_load_from_disk() {
     {
         Config cfg;
         std::string err;
-        CHECK(!load_config("/nonexistent/forger-config.json", cfg, err));
+        CHECK(!load_config("/nonexistent/Chaos_Forger-config.json", cfg, err));
         CHECK_CONTAINS(err, "cannot open");
     }
     // Malformed JSON — parser error surfaces with byte offset.
