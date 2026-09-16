@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(Forger VERSION 1.0.0 LANGUAGES CXX)
+project(Chaos_Forger VERSION 1.0.0 LANGUAGES CXX)
 
 # ---------------------------------------------------------------------------
 # Toolchain baseline
@@ -19,17 +19,17 @@ find_package(Threads REQUIRED)
 # ---------------------------------------------------------------------------
 # Options (no unnecessary dependencies; everything is stdlib + POSIX)
 # ---------------------------------------------------------------------------
-option(FORGER_BUILD_TESTS  "Build the unit-test suites (run with ctest)" ON)
-option(FORGER_ENABLE_ASAN  "Instrument with AddressSanitizer (development only)" OFF)
-option(FORGER_ENABLE_UBSAN "Instrument with UndefinedBehaviorSanitizer (development only)" OFF)
+option(Chaos_Forger_BUILD_TESTS  "Build the unit-test suites (run with ctest)" ON)
+option(Chaos_Forger_ENABLE_ASAN  "Instrument with AddressSanitizer (development only)" OFF)
+option(Chaos_Forger_ENABLE_UBSAN "Instrument with UndefinedBehaviorSanitizer (development only)" OFF)
 
-if(FORGER_ENABLE_ASAN OR FORGER_ENABLE_UBSAN)
+if(Chaos_Forger_ENABLE_ASAN OR Chaos_Forger_ENABLE_UBSAN)
   # Sanitizers are a development tool: they make no sense in a stripped
   # optimized release and are unsafe in the shipped daemon. Force Debug
   # unless the operator explicitly asked for something else, and never
   # combine them with a MinSizeRel-style build.
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "Forger: sanitizers requested - forcing CMAKE_BUILD_TYPE=Debug (was '${CMAKE_BUILD_TYPE}')")
+    message(STATUS "Chaos_Forger: sanitizers requested - forcing CMAKE_BUILD_TYPE=Debug (was '${CMAKE_BUILD_TYPE}')")
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
   endif()
 endif()
@@ -42,19 +42,19 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 # Sanitizer flags apply to every target defined below (library, daemon, tests).
-if(FORGER_ENABLE_ASAN)
+if(Chaos_Forger_ENABLE_ASAN)
   add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
   add_link_options(-fsanitize=address)
 endif()
-if(FORGER_ENABLE_UBSAN)
+if(Chaos_Forger_ENABLE_UBSAN)
   add_compile_options(-fsanitize=undefined -fno-omit-frame-pointer)
   add_link_options(-fsanitize=undefined)
 endif()
 
 # ---------------------------------------------------------------------------
-# forger static library: everything except the daemon entry point
+# Chaos_Forger static library: everything except the daemon entry point
 # ---------------------------------------------------------------------------
-add_library(forger STATIC
+add_library(Chaos_Forger STATIC
   src/log.cpp
   src/json.cpp
   src/config.cpp
@@ -65,23 +65,23 @@ add_library(forger STATIC
   src/shutdown.cpp
   src/engine.cpp
 )
-target_include_directories(forger PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(forger PUBLIC Threads::Threads)
-target_compile_features(forger PUBLIC cxx_std_17)
+target_include_directories(Chaos_Forger PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(Chaos_Forger PUBLIC Threads::Threads)
+target_compile_features(Chaos_Forger PUBLIC cxx_std_17)
 
 # ---------------------------------------------------------------------------
-# Forger daemon executable
+# Chaos_Forger daemon executable
 # ---------------------------------------------------------------------------
-add_executable(Forger main.cpp)
-target_link_libraries(Forger PRIVATE forger)
+add_executable(Chaos_Forger main.cpp)
+target_link_libraries(Chaos_Forger PRIVATE Chaos_Forger)
 
 # ---------------------------------------------------------------------------
 # Tests (optional; dependency-free assert harnesses, run via CTest)
 # ---------------------------------------------------------------------------
-if(FORGER_BUILD_TESTS)
+if(Chaos_Forger_BUILD_TESTS)
   enable_testing()
 
-  set(FORGER_TEST_SOURCES
+  set(Chaos_Forger_TEST_SOURCES
     test_http
     test_config
     test_discovery
@@ -90,24 +90,24 @@ if(FORGER_BUILD_TESTS)
     test_engine
   )
 
-  foreach(name IN LISTS FORGER_TEST_SOURCES)
-    add_executable(forger_${name}_tests tests/${name}.cpp)
-    target_link_libraries(forger_${name}_tests PRIVATE forger)
-    add_test(NAME forger_${name}_tests COMMAND forger_${name}_tests)
+  foreach(name IN LISTS Chaos_Forger_TEST_SOURCES)
+    add_executable(Chaos_Forger_${name}_tests tests/${name}.cpp)
+    target_link_libraries(Chaos_Forger_${name}_tests PRIVATE Chaos_Forger)
+    add_test(NAME Chaos_Forger_${name}_tests COMMAND Chaos_Forger_${name}_tests)
     # Disk-based fixtures (config.json, tests/data/) resolve from the repo root.
-    set_tests_properties(forger_${name}_tests PROPERTIES
+    set_tests_properties(Chaos_Forger_${name}_tests PROPERTIES
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
   endforeach()
 
-  # Real-Docker end-to-end test: SKIPPED (exit 77) unless FORGER_IT_LIVE=1,
+  # Real-Docker end-to-end test: SKIPPED (exit 77) unless Chaos_Forger_IT_LIVE=1,
   # so a plain `ctest` never creates or stops containers. See
   # scripts/integration_test.sh and the README integration-testing section.
-  add_test(NAME forger_integration_tests
+  add_test(NAME Chaos_Forger_integration_tests
            COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/integration_test.sh
-                   --forger-bin $<TARGET_FILE:Forger>)
-  set_tests_properties(forger_integration_tests PROPERTIES
+                   --Chaos_Forger-bin $<TARGET_FILE:Chaos_Forger>)
+  set_tests_properties(Chaos_Forger_integration_tests PROPERTIES
     SKIP_RETURN_CODE 77
-    ENVIRONMENT "FORGER_IT_LIVE=${FORGER_IT_LIVE};FORGER_IT_KILL=${FORGER_IT_KILL}")
+    ENVIRONMENT "Chaos_Forger_IT_LIVE=${Chaos_Forger_IT_LIVE};Chaos_Forger_IT_KILL=${Chaos_Forger_IT_KILL}")
 endif()
 
 # ---------------------------------------------------------------------------
@@ -116,5 +116,5 @@ endif()
 # project, not an installed API - only ship what operators run.
 # ---------------------------------------------------------------------------
 include(GNUInstallDirs)
-install(TARGETS Forger RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES config.json DESTINATION ${CMAKE_INSTALL_SYSCONFDIR} RENAME forger.json)
+install(TARGETS Chaos_Forger RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES config.json DESTINATION ${CMAKE_INSTALL_SYSCONFDIR} RENAME Chaos_Forger.json)
