@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-//  forger/engine.hpp — the chaos engine, as a library component
+//  Chaos_Forger/engine.hpp — the chaos engine, as a library component
 //
 //  One scheduler tick = discover → match → roll → strike → log.
 //
@@ -20,13 +20,13 @@
 #include <optional>
 #include <vector>
 
-#include "forger/chaos.hpp"      // ChaosRoller, action_budget
-#include "forger/config.hpp"     // Config
-#include "forger/discovery.hpp"  // MatchedContainer, match_containers
-#include "forger/docker_api.hpp" // IDockerClient
-#include "forger/shutdown.hpp"
+#include "Chaos_Forger/chaos.hpp"      // ChaosRoller, action_budget
+#include "Chaos_Forger/config.hpp"     // Config
+#include "Chaos_Forger/discovery.hpp"  // MatchedContainer, match_containers
+#include "Chaos_Forger/docker_api.hpp" // IDockerClient
+#include "Chaos_Forger/shutdown.hpp"
 
-namespace forger {
+namespace Chaos_Forger {
 
 // ---------------------------------------------------------------------------
 // The engine. Holds no global state: construction takes everything it needs.
@@ -83,4 +83,4 @@ private:
     long run_budget_used_ = 0;
 };
 
-}  // namespace forger
+}  // namespace Chaos_Forger
