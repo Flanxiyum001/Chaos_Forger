@@ -8,8 +8,8 @@
 //    - names-only, case-sensitive substring matching; first rule wins
 // ============================================================================
 
-#include "forger/discovery.hpp"
-#include "forger/docker_api.hpp"
+#include "Chaos_Forger/discovery.hpp"
+#include "Chaos_Forger/docker_api.hpp"
 
 #include <cstdio>
 #include <string>
@@ -36,7 +36,7 @@ static int g_checks = 0;
         }                                                                    \
     } while (0)
 
-using namespace forger;
+using namespace Chaos_Forger;
 
 // ----------------------------------------------------------------------------
 // Test fixture: parse a canned /containers/json payload (what the Engine sends).
@@ -189,9 +189,9 @@ static void test_discovery_tick_end_to_end() {
     const std::string idb(64, 'b');
     const std::string idc(64, 'c');
     const std::string body =
-        "[{\"Id\":\"" + ida + "\",\"Names\":[\"/forger-web-1\"],"
+        "[{\"Id\":\"" + ida + "\",\"Names\":[\"/Chaos_Forger-web-1\"],"
         "\"Image\":\"nginx:alpine\",\"State\":\"running\",\"Status\":\"Up 2 minutes\"},"
-        "{\"Id\":\"" + idb + "\",\"Names\":[\"/forger-cache-1\"],"
+        "{\"Id\":\"" + idb + "\",\"Names\":[\"/Chaos_Forger-cache-1\"],"
         "\"Image\":\"redis:alpine\",\"State\":\"running\",\"Status\":\"Up 2 minutes\"},"
         "{\"Id\":\"" + idc + "\",\"Names\":[\"/unrelated-app\"],"
         "\"Image\":\"web-app-image:latest\",\"State\":\"running\",\"Status\":\"Up 3 days\"}]";
@@ -200,18 +200,18 @@ static void test_discovery_tick_end_to_end() {
     CHECK_EQ(running.size(), 3u);
 
     const std::vector<TargetRule> rules = {
-        {"forger-web", Action::Stop},
-        {"forger-cache", Action::Kill},
+        {"Chaos_Forger-web", Action::Stop},
+        {"Chaos_Forger-cache", Action::Kill},
     };
     const auto matched = match_containers(running, rules);
 
-    // Exactly the two forger-* containers, in rule order of first appearance.
+    // Exactly the two Chaos_Forger-* containers, in rule order of first appearance.
     CHECK_EQ(matched.size(), 2u);
-    CHECK_EQ(matched[0].container.names.at(0), "forger-web-1");
+    CHECK_EQ(matched[0].container.names.at(0), "Chaos_Forger-web-1");
     CHECK_EQ(matched[0].rule_index, 0u);
     CHECK_EQ(matched[0].container.image, "nginx:alpine");
     CHECK_EQ(matched[0].container.state, "running");
-    CHECK_EQ(matched[1].container.names.at(0), "forger-cache-1");
+    CHECK_EQ(matched[1].container.names.at(0), "Chaos_Forger-cache-1");
     CHECK_EQ(matched[1].rule_index, 1u);
     // The image-only "web-app" container stays untouched.
     for (const MatchedContainer& m : matched) {
