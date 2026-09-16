@@ -2,11 +2,11 @@
 //  src/chaos.cpp — probability decision core
 // ============================================================================
 
-#include "forger/chaos.hpp"
+#include "Chaos_Forger/chaos.hpp"
 
 #include <cmath>
 
-namespace forger {
+namespace Chaos_Forger {
 
 std::vector<MatchedContainer> action_budget(const std::vector<MatchedContainer>& armed,
                                             int max_per_cycle,
@@ -55,4 +55,4 @@ bool ChaosRoller::roll(double* rolled) {
     return value < probability_;
 }
 
-}  // namespace forger
+}  // namespace Chaos_Forger
