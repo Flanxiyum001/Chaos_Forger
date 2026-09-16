@@ -2,13 +2,13 @@
 //  src/json.cpp — minimal read-only JSON parser (moved from main.cpp section 4)
 // ============================================================================
 
-#include "forger/json.hpp"
+#include "Chaos_Forger/json.hpp"
 
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
 
-namespace forger {
+namespace Chaos_Forger {
 
 namespace {
 
@@ -285,4 +285,4 @@ bool JsonParser::parse(const std::string& text, Json& out, std::string& err) {
     return impl.parse(out, err);
 }
 
-}  // namespace forger
+}  // namespace Chaos_Forger
