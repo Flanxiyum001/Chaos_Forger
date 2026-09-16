@@ -2,7 +2,7 @@
 //  src/config.cpp — configuration model, loading, validation
 // ============================================================================
 
-#include "forger/config.hpp"
+#include "Chaos_Forger/config.hpp"
 
 #include <cctype>
 #include <cerrno>
@@ -11,9 +11,9 @@
 #include <fstream>
 #include <sstream>
 
-#include "forger/log.hpp"
+#include "Chaos_Forger/log.hpp"
 
-namespace forger {
+namespace Chaos_Forger {
 
 namespace {
 
@@ -258,4 +258,4 @@ bool load_config(const std::string& path, Config& cfg, std::string& err) {
     return validate_config(root, cfg, err);
 }
 
-}  // namespace forger
+}  // namespace Chaos_Forger
