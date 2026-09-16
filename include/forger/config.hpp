@@ -1,17 +1,17 @@
 #pragma once
 // ============================================================================
-//  forger/config.hpp — configuration model, loading, validation
+//  Chaos_Forger/config.hpp — configuration model, loading, validation
 //
-//  A missing or invalid config must stop Forger at startup with a precise,
+//  A missing or invalid config must stop Chaos_Forger at startup with a precise,
 //  actionable error — never a crash, never a silent default.
 // ============================================================================
 
 #include <string>
 #include <vector>
 
-#include "forger/json.hpp"
+#include "Chaos_Forger/json.hpp"
 
-namespace forger {
+namespace Chaos_Forger {
 
 enum class Action { Stop, Kill };
 
@@ -49,4 +49,4 @@ bool validate_config(const Json& root, Config& cfg, std::string& err);
 // Convenience: read file -> parse JSON -> validate.
 bool load_config(const std::string& path, Config& cfg, std::string& err);
 
-}  // namespace forger
+}  // namespace Chaos_Forger
