@@ -2,16 +2,16 @@
 //  src/docker_api.cpp — Docker Engine API client (version-pinned v1.41)
 // ============================================================================
 
-#include "forger/docker_api.hpp"
+#include "Chaos_Forger/docker_api.hpp"
 
 #include <cctype>
 #include <string>
 #include <vector>
 
-#include "forger/json.hpp"
-#include "forger/log.hpp"
+#include "Chaos_Forger/json.hpp"
+#include "Chaos_Forger/log.hpp"
 
-namespace forger {
+namespace Chaos_Forger {
 
 bool is_valid_container_id(const std::string& id) {
     if (id.size() != 64) return false;
@@ -24,7 +24,7 @@ bool is_valid_container_id(const std::string& id) {
 }
 
 std::string containers_json_path() {
-    // ?all=false is the default but stated explicitly: Forger targets running
+    // ?all=false is the default but stated explicitly: Chaos_Forger targets running
     // containers only and must keep doing so even if defaults ever change.
     return std::string("/") + kDockerApiVersion + "/containers/json?all=false";
 }
@@ -180,4 +180,4 @@ bool DockerClient::ping(std::string& err) {
     return true;
 }
 
-}  // namespace forger
+}  // namespace Chaos_Forger
