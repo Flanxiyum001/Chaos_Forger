@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-//  forger/chaos.hpp — probability decision core + blast-radius budget
+//  Chaos_Forger/chaos.hpp — probability decision core + blast-radius budget
 //
 //  PROBABILITY SEMANTICS (the documented contract):
 //
@@ -27,9 +27,9 @@
 #include <random>
 #include <vector>
 
-#include "forger/discovery.hpp"  // MatchedContainer
+#include "Chaos_Forger/discovery.hpp"  // MatchedContainer
 
-namespace forger {
+namespace Chaos_Forger {
 
 // ---------------------------------------------------------------------------
 // Blast-radius budget: cap strikes per cycle and per process lifetime.
@@ -74,4 +74,4 @@ private:
     std::mt19937_64 rng_;
 };
 
-}  // namespace forger
+}  // namespace Chaos_Forger
