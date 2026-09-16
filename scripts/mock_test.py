@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Mock Docker Engine over a UNIX socket for testing Forger without Docker.
+"""Mock Docker Engine over a UNIX socket for testing Chaos_Forger without Docker.
 
 Serves GET /_ping and GET /containers/json; records every POST it receives in
-a log file so tests can assert that strikes landed. Run it, point a Forger
-config at the socket path, run Forger --once, then stop it.
+a log file so tests can assert that strikes landed. Run it, point a Chaos_Forger
+config at the socket path, run Chaos_Forger --once, then stop it.
 """
 import json
 import os
@@ -13,29 +13,29 @@ import sys
 import threading
 import time
 
-SOCKET = "/tmp/forger-test.sock"
-POST_LOG = "/tmp/forger-post.log"
+SOCKET = "/tmp/Chaos_Forger-test.sock"
+POST_LOG = "/tmp/Chaos_Forger-post.log"
 
-# Failure injection for testing Forger's error handling: when set, POSTs whose
-# path contains this id get a 500 instead of 204 (FORGER_MOCK_DOOMED_ID env).
-DOOMED_ID = os.environ.get("FORGER_MOCK_DOOMED_ID", "")
+# Failure injection for testing Chaos_Forger's error handling: when set, POSTs whose
+# path contains this id get a 500 instead of 204 (Chaos_Forger_MOCK_DOOMED_ID env).
+DOOMED_ID = os.environ.get("Chaos_Forger_MOCK_DOOMED_ID", "")
 
-# Latency injection (FORGER_MOCK_DELAY_MS env): every POST sleeps this long
+# Latency injection (Chaos_Forger_MOCK_DELAY_MS env): every POST sleeps this long
 # before answering, so tests can hold a strike in flight across a SIGINT.
-DELAY_MS = int(os.environ.get("FORGER_MOCK_DELAY_MS", "0"))
-DOOMED_ID = os.environ.get("FORGER_MOCK_DOOMED_ID", "")
+DELAY_MS = int(os.environ.get("Chaos_Forger_MOCK_DELAY_MS", "0"))
+DOOMED_ID = os.environ.get("Chaos_Forger_MOCK_DOOMED_ID", "")
 
 CONTAINERS = [
     {
         "Id": "a" * 64,
-        "Names": ["/forger-web-1"],
+        "Names": ["/Chaos_Forger-web-1"],
         "Image": "nginx:alpine",
         "State": "running",
         "Status": "Up 2 minutes",
     },
     {
         "Id": "b" * 64,
-        "Names": ["/forger-cache-1"],
+        "Names": ["/Chaos_Forger-cache-1"],
         "Image": "redis:alpine",
         "State": "running",
         "Status": "Up 2 minutes",
@@ -43,7 +43,7 @@ CONTAINERS = [
     {
         "Id": "c" * 64,
         "Names": ["/unrelated-app"],
-        "Image": "forger-web-image:latest",  # image contains a rule substring on purpose
+        "Image": "Chaos_Forger-web-image:latest",  # image contains a rule substring on purpose
         "State": "running",
         "Status": "Up 3 days",
     },
