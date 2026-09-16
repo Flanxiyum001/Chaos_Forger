@@ -2,9 +2,9 @@
 //  src/discovery.cpp — container discovery matching (pure logic, no I/O)
 // ============================================================================
 
-#include "forger/discovery.hpp"
+#include "Chaos_Forger/discovery.hpp"
 
-namespace forger {
+namespace Chaos_Forger {
 
 bool contains_substring(const std::string& haystack, const std::string& needle) {
     if (needle.empty()) return false;
@@ -34,4 +34,4 @@ std::vector<MatchedContainer> match_containers(const std::vector<Container>& con
     return matched;
 }
 
-}  // namespace forger
+}  // namespace Chaos_Forger
